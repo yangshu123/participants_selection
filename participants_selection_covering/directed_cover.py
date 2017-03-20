@@ -1,6 +1,6 @@
 import random
 import time
-
+import numpy as np
 
 ROWS = 10
 COLS = 15
@@ -9,7 +9,7 @@ if ROWS * COLS < 100:
 else:
   NORM = 1000
 
-PARTICIPANTS_NUMBER = 80 
+PARTICIPANTS_NUMBER = 51
 BUDGET = 200
 TRAJ1 = 5
 TRAJ2 = 15
@@ -181,19 +181,61 @@ def select_by_probablisticGreedy(trajArr, budget, edgeDic):
 
 
 
-
-
-def maxUti():
-  return 
-  
-
-
-
 def select_by_boundedGreedy(trajArr, budget, edgeDic):
   """
   greedy alg. with worst guarantee of approximate ratio equals 1-1/e
+  this is a recursive function
   """
-  
+  print("visit",len(trajArr))
+
+  if len(trajArr) == 1:
+    if trajArr[0].cost <= budget:
+      print(trajArr[0].cost)
+      return trajArr[0]
+    else:
+      return None
+
+  if len(trajArr) == 2:
+    t1 = trajArr[0].cost
+    t2 = trajArr[1].cost
+    t3 = trajArr[0].cost + trajArr[1].cost
+    if t3 <= budget:
+      print(trajArr[0].cost)
+      print(trajArr[1].cost)
+      return trajArr
+    elif t1 <= budget:
+      return trajArr[0]
+      print(trajArr[0].cost)
+    elif t2 <= budget:
+      return trajArr[1]
+      print(trajArr[1].cost)
+    else:
+      return None
+
+  if len(trajArr) >= 3:
+     # build cursive part
+     k = len(trajArr) / 2
+     trajPool = random.sample(trajArr, k)  
+     cursivePart = [] 
+     print("k=",k)
+     print("cursivePart")
+     for i in range(len(trajPool)):
+       cursivePart.append(trajPool[i])
+       print(trajPool[i].cost)
+
+     # build enumerate part
+     print("enumeratePart")
+     enumeratePart = []
+     complementarySet = set(trajArr).difference(set(cursivePart))
+     for element in complementarySet:
+       enumeratePart.append(element)
+       print(element.cost)
+     
+     # start to solve
+     H1 = select_by_boundedGreedy(cursivePart, budget, edgeDic)
+     
+     participants = enumeratePart
+
   return participants
 
 
@@ -315,6 +357,7 @@ print("average cost", (COST1 + COST2) / 2.0)
 print("average length", (TRAJ1 + TRAJ2) / 2.0)
 parpTrajs = traj_generate(PARTICIPANTS_NUMBER)
 
+"""
 for k in range(1):
   print("********************************************************************************")
   print("********************************************************************************")
@@ -341,7 +384,8 @@ for k in range(1):
     totCost3 += participants3[i].cost
   r3 = cover_rate(edgeDictionary, participants3, True)
   print("pro greedy", k, "cover rate=", r3, "cover_cost=", totCost3)  
-
+"""
+select_by_boundedGreedy(parpTrajs, BUDGET, edgeDictionary)
 
 
 
